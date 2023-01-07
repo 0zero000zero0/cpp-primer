@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include <D:\C in vsocde\header\variety.h>
+#include <D:\C in vsocde\c++ primer\c++ primer\header\variety.h>
 using namespace std;
 int test_variety1 = 1;
 
