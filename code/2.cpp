@@ -93,6 +93,10 @@ int main()
     // *p2 = 1;//但是不能通过p2改变i的值
     // int &r4 = ci;//错误,int&不能绑定到const int上,因为前者可以改变它的值但是后者的定义不允许改变
     const int &r5 = i; // 正确,与指针类似
+    //存在string指针
+    string s1 = "OK";
+    string *p_s1 = &s1;
+    cout << "*p_s1= " << *p_s1 << endl;
 
     // constexpr：c++11中允许声明一个constexpr变量，由编译器检查变量的值是否为常量表达式，且必须由常量表达式来初始化
     constexpr int mf = 20;

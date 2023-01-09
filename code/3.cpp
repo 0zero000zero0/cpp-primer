@@ -1,3 +1,10 @@
+///
+///@file 3.cpp
+///@author Zero (2405549856@qq.com)
+///@brief 个人学习c++ primer时的代码,主要用于复习
+///@date 2023-01-09
+///
+
 #include <bits/stdc++.h>
 #include <D:\C in vsocde\c++ primer\c++ primer\header\variety.h>
 #include <string>
@@ -8,6 +15,8 @@ using namespace std;
 
 int main()
 {
+
+    auto a = "ok";
     // string：要使用string，必须先包含<string>和,使用std::string
     string s1;        // 默认初始化为空字符串
     string s2 = s1;   // S2也是空,或者是string s2(s1)也可以初始化
@@ -69,6 +78,15 @@ int main()
         c2 = toupper(c2); // 转换为大写
     cout << "s4 = " << s4 << endl;
 
+    // 用range for遍历二维数组:除了最内层的遍历循环,其他的所以循环都应该是引用类型
+    int arrayx[2][2] = {1, 2, 3, 4};
+    for (int(&row)[2] : arrayx) // 需要用引用才能进行
+    {
+        for (int &col : row) // 如果使用auto 也要加上&
+            cout << col << " ";
+        cout << endl;
+    }
+    //
     // 案例 转16进制
     const string hex_digits = "0123456789ABCDEF";
     string result;
@@ -132,19 +150,19 @@ int main()
     // 如果要创建一个含有0-9的容器，用列表太多，此时可以创建可以空列表，用vector的成员函数push_back来把值压入到容器的末尾back
     for (int i = 0; i < 10; i++)
         v1.push_back(i);
-    //cin同理
+    // cin同理
     {
         int temp;
-        while (cin >>temp)
+        while (cin >> temp)
         {
             v2.push_back(temp);
         }
     }
-    //高效写入容器带来的副作用就是严格的要求，其中之一是必须确保所写的循环正确，特别是当循环可能改变容量时
-    //不能使用range for 来向容器中添加元素
-    //容器操作除了push_back外,还有很多其他的操作,它们和string的一样,访问也是类似于string
-    //不能使用下标带添加元素,下标只能用于访问已存在的元素
-        // 成绩分段人数统计
+    // 高效写入容器带来的副作用就是严格的要求，其中之一是必须确保所写的循环正确，特别是当循环可能改变容量时
+    // 不能使用range for 来向容器中添加元素
+    // 容器操作除了push_back外,还有很多其他的操作,它们和string的一样,访问也是类似于string
+    // 不能使用下标带添加元素,下标只能用于访问已存在的元素
+    //  成绩分段人数统计
     vector<unsigned> score(11, 0);
     unsigned grade;
     cout << "请输入成绩" << endl;
@@ -155,7 +173,9 @@ int main()
             ++score[grade / 10];
         }
     }
-    for (int i = 0; i <= 10; i++){//输出列表
+    cout << "分段\t"; // 输出列表
+    for (int i = 0; i <= 10; i++)
+    {
         if (0 == i)
         {
             cout << "0~10\t";
@@ -163,10 +183,97 @@ int main()
         else
             cout << i * 10 << "~" << i * 11 << "\t";
     }
-    cout << endl;
+    cout << endl
+         << "人数\t";
     for (auto a1 : score)
         cout << a1 << "\t";
     cout << endl;
+
+    // 迭代器：类似指针，可以用于访问一个容器的元素，因为有的容器不支持下标访问
+    // 使用迭代器
+    auto iterator_begin = v1.begin(), iterator_end = v1.end(); // iterator_begin指示容器第一个元素,而iterator_end指向容器最后一个元素的下一个
+    // 成员函数begin返回第一个元素，而成员函数end返回尾元素的下一个位置(这个位置没有存在元素,只是做个标记),由于空容器begin和end指向一致,因此可以用二者来判断是否为空
+    // 如果容器是常量（const），那么返回类型也是const_iterator,c++11提供cbegin和cend来专门用于返回常量类型
+    // 由于一般不清楚（不在意）迭代器准确的类型，因此使用auto来声明最方便
+    // 任何改变vector容量的操作，例如push_back会使得该vector对象的迭代器失效，具体原因后面解释
+
+    // 迭代器运算:1 迭代器可以用==和!=来比较两个迭代器是否指示的元素是否一致
+    // 2 *iterator 类似指针解引用,返回指向的元素的值
+    // 3 ++iterator 与指针类似,使iterator指向下一个元素,--则指向上一个元素
+    // 注意:由于end实际上并不指向具体的元素,因此对于指向end的迭代器不能解引用,++
+    // 4 iteratot->member 解引用iterator并获取member成员,等于(*iterator).member
+    // 以下只对于string与vector(前提是都是指向同一个的迭代器):除了上三点，还支持iterator+n,iterator-n,iterator+=n,iterator-=n,iter1-iter2(返回类型为defference_type),<=等运算
+
+    // 把第一个字母大写
+    s1 = " some thing?";
+    for (auto i1 = s1.begin(); i1 != s1.end(); ++i1)
+    {
+        // 使用!=而非<是因为有的容器没有定义<,而全部容器都定义了!=和==,因此使用!=和==更加广泛
+        if (!isspace(*i1)) // 确保第一个不是空格
+        {
+            *i1 = toupper(*i1);
+            break;
+        }
+    }
+    cout << "s1= " << s1 << endl;
+
+    // 二分搜索
+    for (int i = 1; i <= 10; i++)
+        v1.push_back(i * i); // v1是vector<int>
+    auto i1 = v1.begin(), i2 = v1.end();
+    auto mid = i1 + (i2 - i1) / 2;
+    int sought = 0;
+    cout << "请输入要查找的数" << endl;
+    cin >> sought;
+    while (mid != i2 && *mid != sought && *v1.end() != sought)
+    {
+        if (sought < *mid)
+        {
+            i2 = mid;
+        }
+        else if (sought > *mid)
+        {
+            i1 = mid + 1;
+        }
+        mid = i1 + (i2 - i1) / 2;
+        if (mid == i2)
+            cout << "不存在" << endl;
+    }
+    if (mid != i2)
+        cout << "该值在第 " << mid - v1.begin() + 1 << " 个位置" << endl;
+
+    // 数组:除了C语言的int等,c++还有string数组,但是不存在引用数组
+    string str1[3] = {"ok", "no", "\n"};
+    int *array1[3] = {nullptr};
+    int *(&r1)[3] = array1; // r1引用一个指针数组
+    // int &u[3]//报错，不存在引用数组
+    // 不允许整个数组的拷贝和赋值
+    // 由于编译器会把数组转化为指针,因此auto推断数组名时结果是对应类型的指针
+    int str2[3] = {1, 2, 3};
+    auto p1(str2); // p1是int*
+
+    // 但是decltype返回的是数组
+    decltype(str2) a2 = {1, 2, 3};
+    // 函数begin和end(不是容器的成员函数):虽然可以通过计算得到尾指针,但是容易出错,因此c++11提供了这两个函数
+    // 这两个函数定义在iterator中
+    // end函数返回的也是尾元素的下一个位置的指针(不是尾元素),因此不能解引用和递增
+    int *b1 = begin(str2), *e1 = end(str2);
+    while (b1 != e1)
+    {
+        cout << *b1 << endl;
+        b1++;
+    }
+
+    // 与旧代码的接口
+    // c_str():用string类型来初始化字符串指针
+    string s8 = "OK";
+    const char *p2 = s8.c_str();   // 如果执行完c_str后想要一直使用返回的数组,建议重新拷贝一份这个数组
+    cout << "p2 = " << p2 << endl; // 不用解引用
+
+    // 虽然不能使用vector来初始化数组,也不能直接用一个数组来初始化另一个数组,但是可以使用数组来初始化vector
+    vector<int> v9(begin(str2), end(str2)); // 只需要指明拷贝区域的首地址和尾后地址
+    for (auto a1 : v9)
+        cout << a1 << endl;
 
     return 0;
 }
