@@ -1,7 +1,7 @@
 ///
 ///@file 3.cpp
 ///@author Zero (2405549856@qq.com)
-///@brief 个人学习c++ primer时的代码,主要用于复习
+///@brief 个人学习c++ primer第三章时的代码,主要用于复习 主题:是字符串,vector,数组
 ///@date 2023-01-09
 ///
 
@@ -23,11 +23,11 @@ int main()
     string s(3, 'a'); // s3为aaa
     cout << s << endl;
     // 用 = 进行初始化实际上是拷贝初始化,把右边的字符串复制到左边
-    // 而()是直接初始化,当初始值有多个时,用()
+    // 而()是直接初始化,当初始值有多个时,用{}
 
     // string操作
-    //  os << s;//把s写入到输出流中,返回s的值
-    //  is >> s1;//从is中读取字符串给s，以空白为分隔符，返回is
+    //  cout << s;//把s写入到输出流中,返回s的值
+    //  cin >> s1;//从is中读取字符串给s，以空白为分隔符，返回is
     // 这里空白指的是空白符号:空格,换行,制表符等
     //  getline(cin, s1), ; // 从istream(cin)中读取一行给s，返回is
     s.empty(); // 判断s是否为空，若为空则返回ture，否则返回false
@@ -59,7 +59,7 @@ int main()
     //         cout << " 字符串长度 " << s.size() << endl;
     // }
     // string::size_type:这是成员函数size()返回结果的类型,是一种unsigned
-    // 如果表达式中有sieze函数，那么就不要在使用int，避免混用int与unsigned可能带来的问题
+    // 如果表达式中有size函数，那么就不要在使用int，避免混用int与unsigned可能带来的问题
     string s4 = "test " + s + "\n";
     cout << s4;
     // string s5 = "hello" + "\n";//报错
@@ -92,13 +92,15 @@ int main()
     string result;
     string::size_type n2 = 0;
     string test;
-    cout << "输入要转为16进制的数字 " << endl;
+    cout << "输入要转为16进制的数字(空格隔开:12 13 10 0)" << endl;
     while (cin >> n2)
     {
         if (n2 < hex_digits.size())
         {
             result += hex_digits[n2];
         }
+        else
+            cout << "越界" << endl;
     }
     cout << "hex number is " << result << endl;
     // 通过n来查找字典hex_digits里的数字,赋给result的每一个字符
@@ -131,7 +133,7 @@ int main()
     // 提供信息的方式为 ：在vector后面加上< 类型 >,这样编译器就可以根据说明书和类型创建一个实例化
     vector<int> ivec;            // ivec保存一个int类型的对象
     vector<vector<string>> file; // file保存的类型是vector这种对象
-    // 由于vector容纳着其他对象，因此也被称为 容器，其中的每一个对象都有与之对应的一个索引，由于索引是一种引用而不是对象，因此没有对应的引用类型
+    // 由于vector容纳着其他对象，因此也被称为 容器(实际上vector是容器的一种)，其中的每一个对象都有与之对应的一个索引，由于索引是一种引用而不是对象，因此没有对应的引用类型
     // 初始化vector，前提是对象要相同
     int val = 1;
     vector<int> v1;          // 默认初始化（空）
@@ -145,7 +147,8 @@ int main()
     vector<int> v6(10);    // 10个元素都是0
     vector<string> v7(10); // 10个元素,每个都是空string对象
     // 如果列表初始化里的值不能用来初始化vector，例如用10来初始化string，那么编译器就会尝试使用默认初始化。此时的10会被用于创建对象
-    vector<string> v8{10, "OK"}; // v8有10个元素,每一个都是默认初始化的值(空)
+    vector<string> v8{10, "OK"};                // v8有10个元素,每一个都是默认初始化的值(空)
+    cout << "v8.size()= " << v8.size() << endl; // v8.size()=10
     // 向vector中添加元素
     // 如果要创建一个含有0-9的容器，用列表太多，此时可以创建可以空列表，用vector的成员函数push_back来把值压入到容器的末尾back
     for (int i = 0; i < 10; i++)
@@ -162,16 +165,19 @@ int main()
     // 不能使用range for 来向容器中添加元素
     // 容器操作除了push_back外,还有很多其他的操作,它们和string的一样,访问也是类似于string
     // 不能使用下标带添加元素,下标只能用于访问已存在的元素
+
     //  成绩分段人数统计
     vector<unsigned> score(11, 0);
     unsigned grade;
-    cout << "请输入成绩" << endl;
+    cout << "请输入成绩(0-100),如果超出就结束输入" << endl;
     while (cin >> grade)
     {
         if (grade <= 100)
         {
             ++score[grade / 10];
         }
+        else
+            break;
     }
     cout << "分段\t"; // 输出列表
     for (int i = 0; i <= 10; i++)
@@ -189,10 +195,12 @@ int main()
         cout << a1 << "\t";
     cout << endl;
 
-    // 迭代器：类似指针，可以用于访问一个容器的元素，因为有的容器不支持下标访问
+    // 迭代器：可以用于访问一个容器的元素，因为有的容器不支持下标访问.指针也是一种迭代器
     // 使用迭代器
-    auto iterator_begin = v1.begin(), iterator_end = v1.end(); // iterator_begin指示容器第一个元素,而iterator_end指向容器最后一个元素的下一个
-    // 成员函数begin返回第一个元素，而成员函数end返回尾元素的下一个位置(这个位置没有存在元素,只是做个标记),由于空容器begin和end指向一致,因此可以用二者来判断是否为空
+    auto iterator_begin = v1.begin();
+    std::vector<int>::iterator iterator_end = v1.end();
+    // iterator_begin指示容器第一个元素,而iterator_end指向容器最后一个元素的下一个
+    // 成员函数begin返回指向第一个元素的迭代器，而成员函数end返回尾元素的下一个位置(这个位置没有存在元素,只是做个标记),由于空容器begin和end指向一致,因此可以用二者来判断是否为空
     // 如果容器是常量（const），那么返回类型也是const_iterator,c++11提供cbegin和cend来专门用于返回常量类型
     // 由于一般不清楚（不在意）迭代器准确的类型，因此使用auto来声明最方便
     // 任何改变vector容量的操作，例如push_back会使得该vector对象的迭代器失效，具体原因后面解释
@@ -220,26 +228,26 @@ int main()
     // 二分搜索
     for (int i = 1; i <= 10; i++)
         v1.push_back(i * i); // v1是vector<int>
-    auto i1 = v1.begin(), i2 = v1.end();
-    auto mid = i1 + (i2 - i1) / 2;
+    auto i_begin = v1.begin(), i_end = v1.end();
+    auto mid = i_begin + (i_end - i_begin) / 2;
     int sought = 0;
     cout << "请输入要查找的数" << endl;
     cin >> sought;
-    while (mid != i2 && *mid != sought && *v1.end() != sought)
+    while (mid != i_end && *mid != sought && *v1.end() != sought)
     {
         if (sought < *mid)
         {
-            i2 = mid;
+            i_end = mid;
         }
         else if (sought > *mid)
         {
-            i1 = mid + 1;
+            i_begin = mid;
         }
-        mid = i1 + (i2 - i1) / 2;
-        if (mid == i2)
+        mid = i_begin + (i_end - i_begin) / 2;
+        if (mid == i_end)
             cout << "不存在" << endl;
     }
-    if (mid != i2)
+    if (mid != i_end)
         cout << "该值在第 " << mid - v1.begin() + 1 << " 个位置" << endl;
 
     // 数组:除了C语言的int等,c++还有string数组,但是不存在引用数组
@@ -251,9 +259,9 @@ int main()
     // 由于编译器会把数组转化为指针,因此auto推断数组名时结果是对应类型的指针
     int str2[3] = {1, 2, 3};
     auto p1(str2); // p1是int*
-
-    // 但是decltype返回的是数组
+    // 但是decltype返回的是数组,此外取地址&,sizeof,typeid也不会转化
     decltype(str2) a2 = {1, 2, 3};
+    int (*p2)[3] = &str2;
     // 函数begin和end(不是容器的成员函数):虽然可以通过计算得到尾指针,但是容易出错,因此c++11提供了这两个函数
     // 这两个函数定义在iterator中
     // end函数返回的也是尾元素的下一个位置的指针(不是尾元素),因此不能解引用和递增
@@ -274,6 +282,6 @@ int main()
     vector<int> v9(begin(str2), end(str2)); // 只需要指明拷贝区域的首地址和尾后地址
     for (auto a1 : v9)
         cout << a1 << endl;
-
+//END
     return 0;
 }
