@@ -113,10 +113,13 @@ int main()
     // constexpr：c++11中允许声明一个constexpr变量，由编译器检查变量的值是否为常量表达式，且必须由常量表达式来初始化
     constexpr int mf = 20;
     constexpr int limit = mf + 1;
+    // 由static修饰的局部变量或者全局变量有固定的地址
+    static int int_static = 1;
     // constexpr也可以是某个函数,此时函数的返回值可以初始化constexpr类型
-    // constexpr也可以修饰指针和引用，但是它们的初始值必须是nullptr，0或者存储于某个固定地址的对象
-    constexpr int *cpr1 = 0; // 实际上cpt是一个指针常量(int *const)
-    constexpr int *cpr2 = nullptr;
+    // constexpr也可以修饰 指针 和
+    // 引用，但是它们的初始值必须是nullptr，0或者存储于某个固定地址(局部static变量或者全局变量)的对象
+    constexpr int *cpr1 = 0;           // 实际上cpt是一个指针常量(int *const)
+    constexpr int *cpr2 = &int_static; // 指向固定地址
     // using可以起到与typdef一样的作用
     typedef int *int_ptr;
     using int_ptr = int *;
@@ -165,6 +168,6 @@ int main()
     };
     struct stu one; // 默认初始化
     cout << "stu one.a = " << one.a << " stu one.b= " << one.b << endl;
-//END
+    // END
     return 0;
 }
