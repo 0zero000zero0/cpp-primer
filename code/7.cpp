@@ -21,10 +21,38 @@ class person // 创建一个类
     const person &show() const; // 显式数据,在参数列表后面加const后,该函数里的this指针指向常量
     void cin(void);             // 输入数据
     person(); // 默认构造函数:没有参数和返回类型,名字和类名一样.(没有参数是默认构造函数的特点)
+    // 创建默认构造函数的对象时,不需要加()
     // person()=default;//default可以使构造函数的形式成为合成默认构造函数(由编译器创建的构造函数)
+    // person(pos x = 3, string s = "#", int y = 1) : name(s), roll(y), pos_x(y){};
+    // 上面的这个语句是自定义的默认构造函数,由于存在默认实参,因此当调用构造函数但是不输入给实参时使用的就是这个
+    // 默认构造函数只能有一个
     // 注意:对于有的类(尤其是需要额外内存资源的函数),编译器不能合成默认构造函数,因此最好自己定义一个默认构造函数
+
     person(string c_name, int c_roo); // 自定义构造函数，类似函数重载.但是也没有返回类型
+    person(string s1, pos x, int y);
     // 由于编译器在编译时先编译名字再编译函数体，也就是函数和变量的顺序不会影响函数使用变量
+
+    // 委托构造函数:用所属类的其他构造函数来初始化.和其他构造函数一样，一个委托构造函数也有一个成员初始值的列表和一个函数体。
+    // 和其他成员初始值一样，类名后面紧跟圆括号括起来的参数列表，参数列表必须与类中另外一个构造函数匹配。
+    person(pos y, pos x) : person("delegating", 3)
+    {
+        // 该委托构造函数委托上面的person(string c_name,int c_roo)来执行部分初始化
+        // 如果参数列表为空,则是默认构造函数,也可以使用委托
+        // 委托的函数也可以是委托构造函数,
+        this->pos_x = y;
+    }
+
+    // 转换构造函数:只接受一个参数,定义了其他类型转化为该类型的隐式转换规则
+    person(pos x) : pos_x(x)
+    {
+        // 接受一个pos x,可以用 = 把其他类型转换为 pos
+        // 例如person test; test=3,14;
+        // 此时就会调用转换构造函数,使用其定义的转换规则,把double的3.14转换为pos x赋值给pos_x
+        this->name = "tansfer";
+        this->roll = 4;
+        this->unfold_data = 4;
+    }
+
     int unfold_data;         // 公有数据，可以用test.unfold_data来访问
     person(int x, string y); // 构造函数初始值列表
 
@@ -49,9 +77,15 @@ class person // 创建一个类
 person::person() // 默认构造函数
 {
     // this指针，指向调用这个函数的对象，可以访问这个对象的成员
-    this->name = "undefined";
+    this->name = "undefined"; // 初始化
     this->roll = 1;
-    this->unfold_data = 1;
+    this->unfold_data;     // 默认初始化为0
+    this->unfold_data = 1; // 赋值
+    // 有时我们可以忽略数据成员初始化和赋值之间的差异，但并非总能这样。
+    // 如果成员是const或者是引用的话，必须将其初始化。因为构造函数是唯一可以初始化的const与引用的时机
+    // 类似的，当成员属于某种类类型且该类没有定义默认构造函数时，也必须将这个成员初始化
+    // 还有一点是初始化的效率比先默认初始化再赋值要高
+    // 初始化的顺序是由定义时的顺序决定的,而不是构造函数里的顺序
 }
 
 person::person(string c_name, int c_roll) // 一般自定义的构造函数，类似重载
@@ -73,6 +107,7 @@ person &person::add(const person &rhs)
 person::person(int x, string y) : name(y), roll(x * x)
 {
     this->unfold_data = 4;
+    // 如果没有this->unfold——data，那么这个数据将执行默认初始化，为0
 };
 
 // 一般而言，this指针是一个指向这个对象的指针常量，而有的时候我们需要底层const
@@ -80,7 +115,7 @@ const person &person::show() const // 在参数列表后面加上const就可以�
 {
     cout << "id = " << name << "  "
          << "roll = " << roll << endl;
-    return *this; // 返回的也是常量引用,意味着在此后不能进行.访问
+    return *this; // 返回的也是常量引用,意味着在此后不能进行.访问（也就是不能test.show().cin)
 }
 
 // 类内函数
@@ -113,7 +148,8 @@ class window_mgr
 {
   private:
     // 一组窗口
-    std::vector<screen> screens; // 类内初始化必须用=或者{}
+    std::vector<screen> screens;
+
   public:
     using screen_index = std::vector<screen>::size_type; // 窗口编号
     void clear(screen_index i);                          // 把所选编号的窗口设置为空
@@ -141,7 +177,7 @@ class screen
     inline screen &set(char c);               // 设定光标位置的字符
     inline screen &set(pos x, pos y, char c); // 设定x,y处的字符
     void some_merbers() const;                // 测试mutable关键字
-    class window_mgr; // 友元类:其中的成员函数可以访问screen的所有成员,包括私有
+    friend class window_mgr; // 友元类:其中的成员函数可以访问screen的所有成员,包括私有
     // 类内函数重载
     screen &display(ostream &os) // 非常量版本
     {
@@ -155,10 +191,9 @@ class screen
     }
 
   private:
-    pos cursor /*光标位置*/
-        = 0,
+    pos cursor = 0, /*光标位置*/
         height /*窗口长*/ = 0, width /*窗口宽*/ = 0;
-    string contents = "";
+    string contents = " ";
     // mutable关键字修饰的变量永远可变，即是在const(this指向const)中也可以修改
     mutable size_t access_ctr = 0;   // access_ctr是可变数据成员
     void do_display(ostream &) const // 负责显示内容
@@ -224,18 +259,46 @@ void window_mgr::clear(screen_index i)
 //         f(); // 未识别，实际上没有声明
 //     }
 // };
-//此外,在类外部的作用域里,类的对象名字被隐藏了
-//因此在类外部定义函数时要加上类作用域符,把作用域转到类中,并且不用在对其他成员授权
-//nielianheishu
+// 此外,在类外部的作用域里,类的对象名字被隐藏了
+// 因此在类外部定义函数时要加上类作用域符,把作用域转到类中,并且不用在对其他成员授权
 /////////////////////////////////////////////////////////////////////////////////
+// 名字查找：声明一个对象时，名字查找会先在该块中这条语句以上查找，如果没有再向块外的上面查找
+// 如果也没有，那么编译器就会报错
+// 类中的名字查找有点不同,其会查找类中所以成员,包括private,而不是只查找该条语句上面的语句
+// 因此，如果类中有成员和全局变量同名，那么类中定义的函数使用的是类中的成员而不是全局变量
+/////////////////////////////////////////////////////////////////////////////////
+// 一般来说，内层作用域可以重新定义外层作用域中的名字，即使该名字已经在内层作用域中使用过。
+// 然而在类中，如果成员使用了外层作用域中的某个名字，
+// 而该名字代表一种类型，则类不能在之后重新定义该名字,也是typedef和using
+typedef double Money;
+Money bal = 4.14;
+class Account
+{
+  public:
+    Money roll; // roll是double
+    Money balance()
+    {
+        // 测试类的名字查找
+        return bal; // 返回的是下面的这个int类型的bal
+    }
+    typedef int Money;
+    // 错误:不能重新定义Money,(但是编译器不报错!)
+    Money bal; // bal是int类型
+    // ...
+};
+// 需要特别注意的是，即使Account中定义的Money类型与外层作用域一致，上述代码仍然是错误的。
+// 尽管重新定义类型名字是一种错误的行为，但是编译器并不为此负责。一些编译器仍将顺利通过这样的代码，而忽略代码有错的事实。
+/////////////////////////////////////////////////////////////////////////////////
+
 int main()
 {
-    person one;               // 默认构造函数
+    person one;               // 默认构造函数:创建默认构造函数的对象时,不需要加()
     person two("li", 1);      // 自定义构造函数
     person three(2, "zhang"); // 构造函数列表初始值
     cout << "please input unfold_data\n";
     read(cin, one);
     cout << "one : ";
+    one = 3.141; // 调用转换构造函数,把3.141转换为pos类型赋给pos_x
     print(cout, one);
     screen myscreen;
     myscreen.move(3, 3).set('#');
@@ -244,5 +307,11 @@ int main()
     myscreen.set('#');
     // 由于move返回的是screen&为左值,因此可以继续使用.来使用set函数
     // 如果move返回是screen，那么实际上的move返回的是myscrenn的副本,set函数并没有实际改变myscreen
+    Account test;
+    test.roll = 3.14;
+    test.bal = 3.14;
+    cout << "roll=" << test.roll << " bal=" << test.bal << "\n"
+         << " balance return = " << test.balance() << endl;
+
     return 0;
 }
