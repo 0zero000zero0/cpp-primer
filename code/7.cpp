@@ -279,7 +279,7 @@ void window_mgr::clear(screen_index i)
 // 而该名字代表一种类型，则类不能在之后重新定义该名字,也是typedef和using
 typedef double Money;
 Money bal = 4.14;
-class Account
+class Accout1
 {
   public:
     Money roll; // roll是double
@@ -293,7 +293,7 @@ class Account
     Money bal; // bal是int类型
     // ...
 };
-// 需要特别注意的是，即使Account中定义的Money类型与外层作用域一致，上述代码仍然是错误的。
+// 需要特别注意的是，即使Accout1中定义的Money类型与外层作用域一致，上述代码仍然是错误的。
 // 尽管重新定义类型名字是一种错误的行为，但是编译器并不为此负责。一些编译器仍将顺利通过这样的代码，而忽略代码有错的事实。
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 聚合类:所有成员都是public的,没有定义任何构造函数。没有类内初始值,没有基类(15章介绍)。
@@ -329,9 +329,56 @@ class constexpr_class
     // 当然也可以是default,但是声明不能有constexpr,因为合成构造函数的隐式声明没有constexpr
     ~constexpr_class();
 };
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// 类的静态成员:有时候我们需要类的成员和类本身相关,而不是和类的对象相关,而且该成员储存方式希望是类的对象共同享有.
+// 当该成员改变时,所有对象的该成员都改变.例如银行利率
+// 使用:在定义类时在需要的成员声明加static即可实现静态成员,成员可以是private或者是public,类型可以是引用,指针或者是类类型
+// 该关键字只能出现在类的内部声明中,在外部定义静态成员时不能重复static关键字
+class Accout2
+{
+  private:
+    std::string owner;
+    double amount;
+    static double initRate;
+    static double interestRate; // 静态成员 利率
+  public:
+    Accout2(string s1, double d1) : owner(s1), amount(d1)
+    {
+        ++accout_count;
+    }
+    void calculate()
+    {
+        amount += amount * interestRate;
+        // 成员函数可以不通过::就能直接访问静态成员
+    }
+    static ostream &show_rate() // 静态成员函数:返回利率
+    {
+        cout << interestRate << endl;
+        return cout; // 静态成员函数没有this指针,因此返回的只能是静态成员
+    }
+    static void change_rate(double);
+    static int accout_count;          // 一般静态成员变量不能在类内初始化
+    static constexpr int peroid = 30; // 但是加上const或者constexpr就可以
+    // 在某些非静态数据成员可能非法的场合，静态成员却可以正常地使用(静态成员变量不属于任何对象)
+    // 举个例子，静态数据成员可以是不完全类型(编译器没有为其分配内存)(也就是可以在类中声明指向类的指针或者是类对象)
+    // 特别的，静态数据成员的类型可以就是它所属的类类型。而非静态数据成员则受到限制，只能声明成它所属类的指针或引用
+    static Accout2 test; // 静态成员可以是不完全类型
+    Accout2 *p;          // 指针实际上在机器上已经定义了大小,所有指针的大小都是一样的
+    // 非静态成员变量不能作为默认实参的(因为本身就是对象的一部分),静态成员变量可以
+};
+// 静态成员位于所有对象之外,对象中不包含静态成员,静态成员被所有对象共享
+// 类似的,静态成员函数也不和对象绑定在一起,因此没有this指针(显式调用和隐式调用都不行),也不能声明为const
+// 由于静态成员不存在于对象之中(他们不是在对象被创建时定义的),因此不能使用构造函数来初始化静态成员
+// 因此类的静态成员只能在类外部定义并初始化,而且只能定义一次.类似全局变量,静态成员变量一直存在于整个程序的生命周期
+// 静态成员函数也可以定义在类外,但是在类外定义时不能重复static关键字,该关键字只能出现在类内部声明时.
+void Accout2::change_rate(double new_rate)
+{
+    interestRate = new_rate;
+}
+// 定义静态成员:在全局区. 类型 类名::成员名字
+double Accout2::interestRate = 1.1;
+int Accout2::accout_count = 0;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int main()
 {
     person one;               // 默认构造函数:创建默认构造函数的对象时,不需要加()
@@ -343,6 +390,7 @@ int main()
     one = 3.141; // 调用转换构造函数,把3.141转换为pos类型赋给pos_x
     // 如果在转换构造函数声明的前加上explicit关键字(抑制转换),那么上面这条语句将会报错
     print(cout, one);
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     screen myscreen;
     myscreen.move(3, 3).set('#');
     // 相当于(但是有区别)
@@ -350,21 +398,37 @@ int main()
     myscreen.set('#');
     // 由于move返回的是screen&为左值,因此可以继续使用.来使用set函数
     // 如果move返回是screen，那么实际上的move返回的是myscrenn的副本,set函数并没有实际改变myscreen
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 测试名字查找
-    Account test;
+    Accout1 test;
     test.roll = 3.14;
     test.bal = 3.14;
-    cout << "roll=" << test.roll << " bal=" << test.bal << "\n"
-         << " balance return = " << test.balance() << endl;
-    struct Data test_data;
+    cout << "roll=" << test.roll << " bal=" << test.bal << " balance return = " << test.balance() << endl;
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // 聚合类
+    struct Data test_data;
     test_data.s = "Yes";
     test_data.val = 1;                                           // 拷贝初始化
     test_data = {0, "No", {1, 1} /*还有一个将会被值初始化为0*/}; // 列表初始化,顺序必须和定义的一致
     for (auto i : test_data.array)
     {
         cout << i << " ";
+        // 输出1 1 0,没有被列表初始化的元素被值初始化为0
     }
     cout << endl;
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // 使用静态成员
+    // 虽然静态成员不属于类的某个对象，但是我们仍然可以使用类的对象、引用或者指针来访问静态成员
+    Accout2 one1("one", 100.0);
+    Accout2 two2("tow", 200.0);
+    cout << "对象数量:" << Accout2::accout_count << endl;
+    cout << "旧利率:";
+    Accout2::show_rate(); // 使用静态成员函数
+    Accout2::change_rate(1.3);
+    cout << "新利率:";
+    Accout2::show_rate();
+    // 没有析构函数?确实奇怪
+    // END
     return 0;
 }
