@@ -1,0 +1,29 @@
+title: 测试
+author: luwantaomail@qq.com
+date: 2019年6月8日
+# 指定汉字字体，如果缺少中文显示将不正常
+CJKmainfont: 方正苏新诗柳楷简体-yolan
+# latex 选项
+fontsize: 12pt
+linkcolor: blue
+urlcolor: green
+citecolor: cyan
+filecolor: magenta
+toccolor: red
+geometry: margin=0.3in
+papersize: A4
+documentclass: article
+
+# pandoc设置
+output:
+  pdf_document:
+    path: /Exports/Habits.pdf
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    highlight: tango
+# 打印背景色
+# 保存文件时自动生成
+# export_on_save:
+#   pandoc: true
+
